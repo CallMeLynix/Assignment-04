@@ -39,7 +39,34 @@ public class SignUpForm : MonoBehaviour
             password = passwordInput.text,
             createDate = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss")
         };
+
+        string jsonData = JsonUtility.ToJson(data);
+        Debug.Log(jsonData);
+
+        StartCoroutine(SendSignUpData(jsonData));
     }
 
+    IEnumerator SendSignUpData(string json)
+{
+    string url = "https://binusgat.rf.gd/unity-api-test/api/auth/signup.php";
+
+    UnityWebRequest www = new UnityWebRequest(url, "POST");
+    byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
+    www.uploadHandler = new UploadHandlerRaw(bodyRaw);
+    www.downloadHandler = new DownloadHandlerBuffer();
+    www.SetRequestHeader("Content-Type", "application/json");
+
+    yield return www.SendWebRequest();
+
+    if (www.result != UnityWebRequest.Result.Success)
+    {
+        Debug.LogError("Error: " + www.error);
+    }
+    else
+    {
+        Debug.Log("Response: " + www.downloadHandler.text);
+        Debug.Log("Form submitted successfully!");
+    }
+}
 
 }
